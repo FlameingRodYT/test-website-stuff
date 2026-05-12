@@ -1,0 +1,27 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Ignored default folder with query files
+/queries/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Yes
+/node_modules/
+/frontend/node_modules/
+/backend/node_modules/
+# env
+*.env/
+/.env/
+/frontend/.env
+/backend/.env
+#
+frontend/dist/
+frontend/build/
+#
+*.log
+npm-debug.log*
+#
+
