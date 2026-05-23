@@ -11,6 +11,53 @@ router.get('/', async (req, res) => {
     res.json(users);
 })
 
+router.get('/me/friendRequests', authenticateToken, async (req, res) => {
+    try {
+        const {friendRequest} = await User.findById(req.user.id)
+
+        let friends = [];
+
+        for (const f of friendRequest) {
+            let user = await User.findById(f)
+            friends.push({user: {
+                _id: user._id,
+                username: user.username,
+                faction: user.faction
+                }});
+        }
+
+        res.json(friends);
+
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+})
+
+router.get('/me/friends', authenticateToken, async (req, res) => {
+    try {
+        const {friendList} = await User.findById(req.user.id)
+
+        let friends = [];
+
+        for (const f of friendList) {
+            let user = await User.findById(f)
+            friends.push({user: {
+                    _id: user._id,
+                    username: user.username,
+                    faction: user.faction
+                }});
+        }
+
+        res.json(friends);
+
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+})
+
+
 router.patch('/me', authenticateToken, async (req, res) => {
 
     try {
@@ -74,6 +121,113 @@ router.patch('/me/password', authenticateToken, async (req, res) => {
         res.status(500).json({ error: err.message })
     }
 })
+
+router.patch('/friends/request', authenticateToken, async (req, res) => {
+
+    try {
+
+        const sender = await User.findById(req.user.id)
+        if (!sender) return res.status(401).json({ error: 'User does not exist' })
+
+        const recipient = await User.findOne({ username: req.body.user.username })
+        if (!recipient) return res.status(404).json({ error: 'Target user not found' })
+
+        if (recipient.friendRequest.some(id => id.equals(sender._id)))
+            return res.status(400).json({ error: 'Friend request already sent' })
+
+        if (recipient.friendList.some(id => id.equals(sender._id)))
+            return res.status(400).json({ error: 'Already friends' })
+
+        await User.findByIdAndUpdate(recipient._id, {
+            $addToSet: { friendRequest: sender._id }
+        })
+
+        res.status(200).json({ message: 'Pending friend request' })
+    }
+    catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+})
+
+router.patch('/friends/request/accept', authenticateToken, async (req, res) => {
+
+    try {
+
+        const sender = await User.findById(req.user.id)
+        const recipient = await User.findById(req.body.id)
+
+        if(recipient.friendList.some(id => id.equals(sender._id)) || sender.friendList.some(id => id.equals(recipient._id))) {
+            return res.status(401).json({ error: 'The User is already your friend' })
+        }
+
+        //UPDATE user friend list for both
+        await User.findByIdAndUpdate(sender._id,{
+            $addToSet: {friendList: recipient._id}});
+        await User.findByIdAndUpdate(recipient._id,{
+            $addToSet: {friendList: sender._id}});
+
+        //DELETE friend request
+        await User.findByIdAndUpdate(sender._id, {
+            $pull: {friendRequest: recipient._id}
+        })
+
+        res.status(200).json({ message: 'Fren added successfully' });
+    }
+    catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+
+})
+
+router.patch('/friends/request/delete', authenticateToken, async (req, res) => {
+
+    try {
+
+        const sender = await User.findById(req.user.id)
+        const recipient = await User.findById(req.body.data.id)
+
+        if(!sender.friendRequest.some(id => id.equals(recipient._id))) {
+            return res.status(401).json({ error: 'Already removed!' })
+        }
+
+        await User.findByIdAndUpdate(sender._id, {
+            $pull: {friendRequest: recipient._id}
+        })
+
+        res.status(200).json({ message: 'Fren not added successfully' });
+    }
+    catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+
+})
+
+router.patch('/friends/remove', authenticateToken, async (req, res) => {
+
+    try {
+        const sender = await User.findById(req.user.id)
+        const recipient = await User.findById(req.body.id)
+        if(!sender.friendRequest.some(id => id.equals(recipient._id))) {
+            return res.status(401).json({ error: 'Already removed!' })
+        }
+
+        await User.findByIdAndUpdate(sender._id, {
+            $pull: {friendList: recipient._id}
+        })
+        await User.findByIdAndUpdate(recipient._id, {
+            $pull: {friendList: recipient._id}
+        })
+
+
+
+    }
+    catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+
+})
+
+
 
 
 module.exports = router;

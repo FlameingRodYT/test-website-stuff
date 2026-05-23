@@ -50,6 +50,7 @@ export default function Chat() {
     const [roomMembers, setRoomMembers] = useState([])
     //Modal view for users
     const [selectedMember, setSelectedMember] = useState(null)
+    const [friendError, setFriendError] = useState('')
 
 
     //if user isnt logged in or well doesnt have a token, bring ti back
@@ -121,6 +122,16 @@ export default function Chat() {
     const handleLogout = async () => {
         await logout()
         navigate('/')
+    }
+
+    const handleFriendRequest = async () => {
+        try {
+            console.log(selectedMember)
+            const res = await api.patch('/user/friends/request', selectedMember)
+            setFriendError('')
+        } catch (err) {
+            setFriendError(err.response?.data?.error || 'Failed to add friend')
+        }
     }
 
     //This we use to actuallyfor flavour aka we check how many users are typing
@@ -350,7 +361,7 @@ export default function Chat() {
                         {/* Close button */}
                         <div className="flex justify-end px-4 pt-2">
                             <button onClick={() => setSelectedMember(null)}
-                                    className="text-gray-500 hover:text-white text-xs transition">
+                                    className="text-gray-400 hover:text-white text-sm font-medium transition px-2 py-1 rounded hover:bg-gray-800">
                                 ✕ close
                             </button>
                         </div>
@@ -366,6 +377,18 @@ export default function Chat() {
                                 <p className="text-gray-600 text-xs uppercase tracking-wider">Member since</p>
                                 <p className="text-gray-400 text-sm">—</p>
                             </div>
+
+                            {auth?.username !== selectedMember.user.username && (
+                                <div className="border-t border-gray-800 pt-3">
+                                    <button
+                                        onClick={handleFriendRequest}
+                                        className="w-full bg-blue-900/40 text-blue-400 border border-blue-800 text-xs py-2 rounded hover:bg-blue-900/70 transition font-medium"
+                                    >
+                                        + Add Friend
+                                    </button>
+                                    {friendError && <p className="text-red-400 text-xs">{friendError}</p>}
+                                </div>
+                            )}
 
                             {/* Admin actions placeholder — wire up later */}
                             {auth?.role === 'admin' && (

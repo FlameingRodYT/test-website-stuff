@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
     faction: { type: String, default: 'Neutral' }, //These are the factions a person might choose
     createdAt: { type: Date, default: Date.now },
     role: { type: String, enum: ['user', 'super_admin'],  default: 'user' },
+    friendList: [{type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true}],
+    friendRequest: [{type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true}]
 });
 
 module.exports = mongoose.model('User', userSchema);
