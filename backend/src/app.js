@@ -43,31 +43,11 @@ connectDB().then(async () => {
     const Room = require('./models/Room');
 
     const defaultRooms = [
-        { name: 'Cantina', description: 'Open to all factions. Keep it civil.', faction: 'Neutral',  members: [{
-                user: {},
-                role: {},
-                joinedAt: {}
-            }] },
-        { name: 'Rebel Alliance HQ', description: 'Rebel operatives only.', faction: 'Rebel Alliance',  members: [{
-                user: {},
-                role: {},
-                joinedAt: {}
-            }] },
-        { name: 'Imperial Command', description: 'Long live the Empire.', faction: 'Galactic Empire',  members: [{
-                user: {},
-                role: {},
-                joinedAt: {}
-            }] },
-        { name: 'Mandalorian Covert', description: 'This is the way.', faction: 'Mandalorian',  members: [{
-                user: {},
-                role: {},
-                joinedAt: {}
-            }] },
-        { name: 'Jedi Archives', description: 'Knowledge and wisdom of the Order.', faction: 'Jedi Order',  members: [{
-                user: {},
-                role: {},
-                joinedAt: {}
-            }] },
+        { name: 'Cantina',            description: 'Open to all factions. Keep it civil.', faction: 'Neutral' },
+        { name: 'Rebel Alliance HQ',  description: 'Rebel operatives only.',               faction: 'Rebel Alliance' },
+        { name: 'Imperial Command',   description: 'Long live the Empire.',                faction: 'Galactic Empire' },
+        { name: 'Mandalorian Covert', description: 'This is the way.',                     faction: 'Mandalorian' },
+        { name: 'Jedi Archives',      description: 'Knowledge and wisdom of the Order.',   faction: 'Jedi Order' },
     ];
 /*
 Incase a room was deleted, we update/ recreate it, otherwise its just a safe pattern of ensuring the rooms are there
@@ -79,7 +59,7 @@ Incase a room was deleted, we update/ recreate it, otherwise its just a safe pat
                 $setOnInsert: { //Brilliant work mr Kojima, fki g hell I forgot I had an udpate statemtne hehere aaaaaaa
                     description: room.description,
                     faction: room.faction,
-                    members: [{}],
+                    members: [],
                 }
             },
             { upsert: true }

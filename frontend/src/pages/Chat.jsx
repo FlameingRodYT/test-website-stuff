@@ -80,6 +80,7 @@ export default function Chat() {
         if(room?.members) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setRoomMembers(room.members)
+            console.log(room.members)
         }
 
     }, [currentRoomId, rooms])
