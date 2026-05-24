@@ -17,10 +17,12 @@ const clients = new Map(); //our client conenction information is stored here
             client => client.readyState === WebSocket.OPEN
         );
 
+        const removeDuplicates = [...new Set(activeInRoom)];
+
         //Our payload send if a user is active
         const payload = JSON.stringify({
             type: 'presence',
-            users: activeInRoom.map(c => ({
+            users: removeDuplicates.map(c => ({
                 userId: c.userId,
                 username: c.username,
                 faction: c.faction,

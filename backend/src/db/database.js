@@ -1,3 +1,4 @@
+require('dotenv').config()
 const mongoose = require('mongoose');
 /*
 SELF explanatory, but this is basically how we connect ot our database, in our case we use MongodDB atlas adn the infomration to the connection is stored in .env file

@@ -126,7 +126,6 @@ export default function Chat() {
 
     const handleFriendRequest = async () => {
         try {
-            console.log(selectedMember)
             const res = await api.patch('/user/friends/request', selectedMember)
             setFriendError('')
         } catch (err) {
@@ -221,13 +220,21 @@ export default function Chat() {
 
                 {/* User info */}
                 <div className="p-4 border-t border-gray-800 flex justify-between items-center">
-                    <div>
-                        <a onClick={() => navigate('/profile')}><p className="text-white text-sm font-medium">{auth?.username}</p></a>
-                        <p className={`text-xs ${FACTION_COLORS[auth?.faction]}`}>{auth?.faction}</p>
+                    <div
+                        onClick={() => navigate('/profile')}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-800 transition cursor-pointer flex-1 min-w-0"
+                    >
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border shrink-0 ${FACTION_AVATAR[auth?.faction]}`}>
+                            {auth?.username?.slice(0, 1).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-white text-sm font-medium truncate">{auth?.username}</p>
+                            <p className={`text-xs ${FACTION_COLORS[auth?.faction]}`}>{auth?.faction}</p>
+                        </div>
                     </div>
                     <button
                         onClick={handleLogout}
-                        className="text-red-600 hover:text-red-400 text-xs transition"
+                        className="text-red-600 hover:text-red-400 text-xs transition ml-2 shrink-0"
                     >
                         Logout
                     </button>
@@ -317,31 +324,61 @@ export default function Chat() {
                     <p className="text-gray-600 text-xs uppercase tracking-widest font-mono">Holocomm</p>
                     <p className="text-gray-700 text-xs font-mono mt-0.5">{roomMembersOnline.length} online</p>
                 </div>
-                <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
-                    {roomMembers.map(member => {
-                        const isOnline = roomMembersOnline.some(o => o.username === member.user.username)
-                    return (
-                        <div key={member.user}
-                             onClick={() => setSelectedMember(member)}
-                             className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-800 transition cursor-default">
-                            <div className="relative flex-shrink-0">
-                                {member.user.avatar
-                                    ? <img src={member.avatar} className="w-8 h-8 rounded-full object-cover border border-gray-700" />
-                                    : <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border 
-    ${FACTION_AVATAR[member.user.faction]} ${!isOnline ? 'opacity-40' : ''}`}>
-                                        {member.user.username.slice(0, 2).toUpperCase()}
-                                    </div>
-                                }
-                                <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-gray-900 ${isOnline ? 'bg-emerald-500' : 'bg-gray-600'}`} />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="text-gray-300 text-xs font-medium truncate">{member.user.username}</p>
-                                <p className={`text-xs truncate ${FACTION_COLORS[member.user.faction]}`} style={{fontSize: '10px', opacity: 0.7}}>
-                                    {isOnline ? member.user.faction : 'Offline'}
+                <div className="flex-1 overflow-y-auto p-3 space-y-0.5">
+                    {['supreme_commander', 'commander', 'member'].map(role => {
+                        const group = roomMembers.filter(m => m.role === role)
+                        if (group.length === 0) return null
+
+                        const roleLabel = {
+                            supreme_commander: 'Supreme Commander',
+                            commander: 'Commander',
+                            member: 'Member',
+                        }[role]
+
+                        const roleLabelColor = {
+                            supreme_commander: 'text-yellow-400',
+                            commander: 'text-purple-400',
+                            member: 'text-gray-500',
+                        }[role]
+
+                        return (
+                            <div key={role}>
+                                <p className={`text-5xl uppercase tracking-wider px-2 pt-2 pb-1 font-mono ${roleLabelColor}`}
+                                   style={{ fontSize: '10px' }}>
+                                    {roleLabel} — {group.length}
                                 </p>
+                                {group.map(member => {
+                                    const isOnline = roomMembersOnline.some(o => o.username === member.user.username)
+                                    return (
+                                        <div
+                                            key={member.user._id}
+                                            onClick={() => setSelectedMember(member)}
+                                            className="flex items-center gap-2 px-4 py-1.5 rounded hover:bg-gray-800 transition cursor-default"
+                                        >
+                                            <div className="relative shrink-0">
+                                                {member.user.avatarUrl
+                                                    ? <img src={member.user.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-gray-700" />
+                                                    : <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold border 
+                        ${FACTION_AVATAR[member.user.faction]} ${!isOnline ? 'opacity-40' : ''}`}>
+                                                        {member.user.username.slice(0, 2).toUpperCase()}
+                                                    </div>
+                                                }
+                                                <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border border-gray-900 
+                      ${isOnline ? 'bg-emerald-500' : 'bg-gray-600'}`} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-gray-300 text-xs font-medium truncate">{member.user.username}</p>
+                                                <p className={`text-xs truncate ${FACTION_COLORS[member.user.faction]}`}
+                                                   style={{ fontSize: '10px', opacity: 0.7 }}>
+                                                    {isOnline ? member.user.faction : 'Offline'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
                             </div>
-                        </div>
-                    )})}
+                        )
+                    })}
                 </div>
             </div>
             {/* Member Profile Modal */}
@@ -353,9 +390,15 @@ export default function Chat() {
 
                         {/* Banner + Avatar */}
                         <div className="h-20 bg-gradient-to-r from-gray-800 to-gray-700 relative">
-                            <div className={`absolute -bottom-8 left-5 w-16 h-16 rounded-full border-4 border-gray-900 flex items-center justify-center text-xl font-bold ${FACTION_AVATAR[selectedMember.user.faction]}`}>
-                                {selectedMember.user.username.slice(0, 2).toUpperCase()}
-                            </div>
+                            {selectedMember.user.avatarUrl
+                                ? <img
+                                    src={selectedMember.user.avatarUrl}
+                                    className="absolute -bottom-8 left-5 w-16 h-16 rounded-full object-cover border-4 border-gray-900"
+                                />
+                                : <div className={`absolute -bottom-8 left-5 w-16 h-16 rounded-full border-4 border-gray-900 flex items-center justify-center text-xl font-bold ${FACTION_AVATAR[selectedMember.user.faction]}`}>
+                                    {selectedMember.user.username.slice(0, 2).toUpperCase()}
+                                </div>
+                            }
                         </div>
 
                         {/* Close button */}

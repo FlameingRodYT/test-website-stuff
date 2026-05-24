@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 const router = express.Router()
 const User = require('../models/User');
@@ -5,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const authenticateToken = require("../service/auth");
 const Room = require('../models/Room');
 const bcrypt = require('bcrypt')
+const { upload, cloudinary } = require('../service/cloudinary')
 
 router.get('/', async (req, res) => {
     const users = await User.find();
@@ -227,7 +229,35 @@ router.patch('/friends/remove', authenticateToken, async (req, res) => {
 
 })
 
+router.patch('/me/avatar', authenticateToken, upload.single('avatar'), async (req, res) => {
+    try {
 
+        const user = await User.findById(req.user.id)
+
+        if (user.avatarUrl) {
+            // Extract public ID from the URL
+            // URL format: .../upload/v1234567890/holonet-images/filename.jpg
+            const urlParts = user.avatarUrl.split('/')
+            const filename = urlParts[urlParts.length - 1].split('.')[0]  // strip extension
+            const folder = urlParts[urlParts.length - 2]
+            const publicId = `${folder}/${filename}`
+
+            await cloudinary.uploader.destroy(publicId)
+        }
+
+        const avatarUrl = req.file.path
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user.id,
+            { avatarUrl },
+            { new: true }
+        )
+
+        res.status(200).json({ avatarUrl: updatedUser.avatarUrl })
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+})
 
 
 module.exports = router;

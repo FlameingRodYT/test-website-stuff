@@ -54,9 +54,28 @@ router.post('/register', async (req, res) => {
         /*
         10 is a standard salt for hashing, the more you add the longer it takes
          */
+        //TODO: make sure the password adheres to the rule of above 16 char and at least 1 special cahrater....
+        if (password.length > 30) {
+            return res.status(400).json({ error: 'Password is larger than 30 characters' });
+        } else if (password.length < 10) {
+            return res.status(400).json({ error: 'Password is shorter than 10 characters' });
+        }
+
+        const checks = [
+            { regex: /[a-z]/, message: 'Password must contain at least one lowercase letter' },
+            { regex: /[A-Z]/, message: 'Password must contain at least one uppercase letter' },
+            { regex: /\d/,    message: 'Password must contain at least one number' },
+            { regex: /[@.#$!%^&*.?]/, message: 'Password must contain at least one special character' },
+        ];
+
+        for (const { regex, message } of checks) {
+            if (!regex.test(password)) {
+                return res.status(400).json({ error: message });
+            }
+        }
+
         const passwordHash = await bcrypt.hash(password, 10);
         const user = await User.create({ username, passwordHash, faction });
-        //TODO: make sure the password adheres to the rule of above 16 char and at least 1 special cahrater....
 
         //We add our user to the neutral room and the room of the user faction
         await Room.updateMany(

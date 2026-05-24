@@ -11,7 +11,7 @@ Simple route that finds all rooms
 router.get('/', authenticateToken,async (req, res) => {
     try {
         //With this commadn we both get and popualte our user and also prevent password has leaks so litearlly only the important data can be viewed aka username
-        const rooms = await Room.find({ 'members.user' : req.user.id }).populate('members.user', 'username faction');
+        const rooms = await Room.find({ 'members.user' : req.user.id }).populate('members.user', 'username faction avatarUrl');
         res.json(rooms);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -48,10 +48,8 @@ router.post('/', authenticateToken, async (req, res) => {
             ? await User.find({}, '_id role')
             : await User.find({ faction }, '_id role');
 
-        const memberIds = eligibleUsers.map(u => u._id);
-        const supreme_commander = eligibleUsers
-            .filter(u => u.role === 'super_admin')
-            .map(u => u._id);
+        //If not work bring back the old system
+        const supreme_commander = await User.findOne({role: 'super_admin'})
 
         const normalUsers = eligibleUsers
             .filter(u =>
@@ -68,12 +66,12 @@ router.post('/', authenticateToken, async (req, res) => {
             role: 'commander',
         });
 
-        supreme_commander.forEach(id => {
-            members.push({
-                user: id,
-                role: 'supreme_commander',
-            });
+
+        members.push({
+            user: supreme_commander._id,
+            role: 'supreme_commander',
         });
+
 
         normalUsers.forEach(id => {
             members.push({
@@ -91,12 +89,14 @@ router.post('/', authenticateToken, async (req, res) => {
             members: members,
         });
 
-        const populated = await room.populate('members.user', 'username faction');
+        const populated = await room.populate('members.user', 'username faction avatarUrl');
         res.status(201).json(populated);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
+//TODO: kcik and ban users
 
 
 module.exports = router;

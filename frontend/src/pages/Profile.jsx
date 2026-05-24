@@ -94,7 +94,7 @@ export default function Profile() {
     const handleAccept = async (userId) => {
         try {
             await api.patch('/user/friends/request/accept', { id: userId})
-            setFriendRequests(prev => prev.filter(r => r._id !== userId))
+            setFriendRequests(prev => prev.filter(r => r.user._id !== userId))
         } catch (err) {
             setFriendRequestsError(err.response?.data?.error || 'Failed to accept request')
         }
@@ -103,7 +103,7 @@ export default function Profile() {
     const handleDecline = async (userId) => {
         try {
             await api.patch('/user/friends/request/delete', { data: { id: userId} })
-            setFriendRequests(prev => prev.filter(r => r._id !== userId))
+            setFriendRequests(prev => prev.filter(r => r.user._id !== userId))
         } catch (err) {
             setFriendRequestsError(err.response?.data?.error || 'Failed to decline request')
         }
@@ -115,6 +115,23 @@ export default function Profile() {
             setFriends(prev => prev.filter(f => f._id.toString() !== userId.toString()))
         } catch (err) {
             setFriendsError(err.response?.data?.error || 'Failed to remove friend')
+        }
+    }
+
+    const handleAvatarUpload = async (e) => {
+        const file = e.target.files[0]
+        if (!file) return
+
+        const formData = new FormData()
+        formData.append('avatar', file)
+
+        try {
+            const res = await api.patch('/user/me/avatar', formData, {
+                headers: {'Content-Type': 'multipart/form-data'}
+            })
+            login({...auth, avatarUrl: res.data.avatarUrl})
+        } catch (err) {
+            console.error('Avatar upload failed', err)
         }
     }
 
@@ -179,17 +196,24 @@ export default function Profile() {
 
                         {/* Avatar Section */}
                         <div className="flex items-center gap-6">
-                            <div className="relative group">
-                                <div className="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center text-2xl font-bold cursor-pointer border border-gray-700 group-hover:border-blue-400 transition">
-                                    U
-                                </div>
-                                <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-gray-300 transition cursor-pointer">
+                            <div
+                                className="relative group w-24 h-24 rounded-full cursor-pointer flex-shrink-0"
+                                onClick={() => document.getElementById('avatarInput').click()}
+                            >
+                                {auth?.avatarUrl
+                                    ? <img src={auth.avatarUrl} className="w-24 h-24 rounded-full object-cover border border-gray-700" />
+                                    : <div className="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center text-2xl font-bold border border-gray-700">
+                                        {auth?.username?.slice(0, 1).toUpperCase()}
+                                    </div>
+                                }
+                                <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-gray-300 transition pointer-events-none">
                                     Change
                                 </div>
+                                <input id="avatarInput" type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                             </div>
                             <div>
                                 <p className="text-lg font-semibold">Edit your avatar</p>
-                                <p className="text-sm text-gray-500">Click the circle to upload a new profile picture</p>
+                                <p className="text-sm text-gray-500">Click to upload a new profile picture</p>
                             </div>
                         </div>
 
