@@ -26,8 +26,12 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-    origin: 'https://6a15d1373d76ee265b41989b--sensational-lolly-33ea3c.netlify.app/',
-    credentials: true
+    origin: [
+        'https://sensational-lolly-33ea3c.netlify.app',
+        'https://6a15d63d3d76ee359c419801--sensational-lolly-33ea3c.netlify.app'
+    ],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
 app.use(express.json());
 app.use(cookieParser())
