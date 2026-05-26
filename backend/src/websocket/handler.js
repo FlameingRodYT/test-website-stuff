@@ -35,7 +35,7 @@ const clients = new Map(); //our client conenction information is stored here
 
 
 const setupWebSocket = (server) => {
-    const wss = new WebSocket.Server({ server });
+    const wss = new WebSocket.Server({ port: 8080 });
 
     wss.on('connection', async (ws, req) => {
 

@@ -73,9 +73,10 @@ Incase a room was deleted, we update/ recreate it, otherwise its just a safe pat
         );
     }
 
-    setupWebSocket(server);
+    //setupWebSocket(server);
 
-    server.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
+    app.listen(PORT, () => {
+        console.log(`Example app listening at http://localhost:${PORT}`);
+    })
+
 });
