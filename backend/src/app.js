@@ -25,7 +25,10 @@ Start out APU stuff
 const app = express();
 const server = http.createServer(app);
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://6a15d1373d76ee265b41989b--sensational-lolly-33ea3c.netlify.app/',
+    credentials: true
+}))
 app.use(express.json());
 app.use(cookieParser())
 

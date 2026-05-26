@@ -6,7 +6,7 @@ Ease of use and atuo establish axios api connection
 //All our axios methods will be posted wiht /api at the begining
 //withCredientals refers to our JWT token being parsed via httpOnly cookies -> secure against XSS kinda
 const api = axios.create({
-    baseURL: '/api',
+    baseURL: import.meta.env.VITE_API_URL || '/api',
     withCredentials: true,
 })
 //RefreshToken stuff, basically we check if we need a new refresh and so it does not spam anything

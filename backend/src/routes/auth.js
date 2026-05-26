@@ -11,8 +11,8 @@ const authenticateToken = require("../service/auth");
 //httpOnly -> this is our cookie flag TO MAKING IT httpOnly so the browser doesnt even get a say in it
 const COOKIE_OPTIONS = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: true,
+    sameSite: 'none',
 }
 
 //This method is used to issuing all our neededTokens
