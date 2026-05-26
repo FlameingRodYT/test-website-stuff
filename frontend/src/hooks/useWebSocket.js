@@ -22,8 +22,7 @@ export const useWebSocket = () => {
             //protocol required for the browser to recognise what happens
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
             //We use the protocol, aka we tell what we connect and where as well as with what content
-            const wsUrl = import.meta.env.VITE_WS_URL ||
-                `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
+            const wsUrl = 'wss://cc251072-11062.node.ustp.cloud:11062';
 
             ws = new WebSocket(wsUrl)
             //we refrence it for each user ot enable seamless transition
